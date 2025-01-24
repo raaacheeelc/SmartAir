@@ -1,0 +1,27 @@
+services:
+  mqtt-broker2:
+    image: eclipse-mosquitto:latest
+    container_name: mqtt-broker2
+    ports:
+      - "8883:8883"  # Porta MQTT
+    restart: unless-stopped
+    volumes:
+      - ./config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./certs/ca.crt:/certs/ca.crt
+      - ./certs/server.crt:/certs/server.crt
+      - ./certs/server.key:/certs/server.key
+
+  fog-python-script:
+    build:
+      context: .
+    container_name: fog-python-script
+    depends_on:
+      - mqtt-broker2
+    volumes:
+      - ./config_fog_node/config.json:/config_fog_node/config.json          
+      - ./certs/ca.crt:/certs/ca.crt
+      - ./certs/fognode.crt:/certs/fognode.crt
+      - ./certs/fognode.key:/certs/fognode.key
+    environment:
+      - BROKER_HOST=mqtt-broker2
+      - BROKER_PORT=8883
