@@ -22,9 +22,7 @@ const data = [
     }
   ]
   
-  const aioKey = "aio_njFo663mRN3N0a5Rq7lPbpcT2whz"; // API Key
-  const username = "acalifano"; // Nome utente Adafruit IO
-  const groupKey = "dispositivosmartairfisciano"; // Chiave del gruppo
+
 
 
 adafruitRoute.get("/getData",async (req, res) => {
@@ -37,7 +35,7 @@ adafruitRoute.get("/getData",async (req, res) => {
         
             const response = await axios.get(url, {
               headers: {
-                "X-AIO-Key": aioKey, // Header per autenticare la richiesta
+                "X-AIO-Key": process.env.ADAFRUIT_API_KEY, // Header per autenticare la richiesta
               },
             });
         
