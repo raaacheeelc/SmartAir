@@ -23,8 +23,9 @@ app.use(cors(corsOptions));
 app.use(express.json()); // Necessario per analizzare JSON nel corpo della richiesta
 
 // Routes
-const apiRoutes = require("/adafruitRoute");
-app.use("/data", apiRoutes);
+
+const { adafruitRoute } = require("./adafruitRoute");
+app.use("/data", adafruitRoute);
 
 // Start Server
 const PORT = process.env.PORT || 5000;

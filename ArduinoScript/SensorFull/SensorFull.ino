@@ -29,11 +29,11 @@ Adafruit_AHTX0 aht;
 
 LiquidCrystal lcd(25, 26, 16, 17, 18, 19);
 
-const char* ssid = "WIFI SSD";
-const char* password = "WIFI PASS";
+const char* ssid = "WIFI_SSD";
+const char* password = "WIFI_PASS";
 
 //Per la connessione con il broker
-const char* mqtt_server = "192.168.156.155";
+const char* mqtt_server = "SERVER MQTT";
 const int mqtt_port = 8883;  // Porta per connessione TLS (La 1883 è non sicura e la usiamo per test)
 
 
@@ -119,7 +119,7 @@ void reconnect() {
   while (!mqttClient.connected()) {
     Serial.print("Connessione al broker MQTT...");
     // Connetti al broker (anonimamente)
-    if (mqttClient.connect("Dispositivo Area Sud")) {
+    if (mqttClient.connect("Dispositivo")) {
       lcd.println("Connesso");
       Serial.println("Connesso!");
     } else {
