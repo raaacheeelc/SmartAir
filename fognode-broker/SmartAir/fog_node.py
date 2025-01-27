@@ -1,4 +1,6 @@
 import paho.mqtt.client as mqtt
+import os
+import csv
 import time
 import threading
 import requests
@@ -45,6 +47,8 @@ ADAFRUIT_FEEDS = {
     "h": "h"
 }
 
+DATA_FILE = "sensor_data.csv"
+
 # buffer per accumulare i dati
 data_buffer = {key: [] for key in VALID_RANGES.keys()}
 
@@ -57,7 +61,19 @@ def calculate_average(data_list):
         return None
     return sum(data_list) / len(data_list)
 
+def save_data_to_csv(data):
+    file_exists = os.path.exists(DATA_FILE)
 
+    with open(DATA_FILE, mode="a", newline="") as file:
+        print("apro il file csv")
+        writer = csv.DictWriter(file, fieldnames=data.keys())
+
+        if not file_exists:
+            writer.writeheader()
+
+        writer.writerow(data)
+    print(f"Dati salvati nel file: {DATA_FILE}")
+    
 def aggregate_and_send():
     while True:
         time.sleep(180)  # Aspetta 3 minuti
@@ -69,14 +85,14 @@ def aggregate_and_send():
                 avg_value = calculate_average(values)
                 if avg_value is not None:
                     aggregated_data[key] = avg_value
-            # Svuota il buffer dopo l'elaborazione
             for key in data_buffer.keys():
                 data_buffer[key] = []
 
         # Invia i dati aggregati al cloud
         if aggregated_data:
+            save_data_to_csv(aggregated_data)
             print(f"[INFO] Dati aggregati: {aggregated_data}")
-            send_to_adafruit(aggregated_data)  # Invio ad Adafruit
+            send_to_adafruit(aggregated_data) 
         else:
             print("[INFO] Nessun dato da inviare")
 
@@ -106,6 +122,8 @@ def send_to_cloud(data):
         print("Dati inviati al cloud con successo")
     except requests.exceptions.RequestException as e:
         print(f"Errore nell'invio dei dati al cloud: {e}")    
+
+
 
 # Funzione di callback per quando arriva un messaggio
 def on_message(client, userdata, msg):
