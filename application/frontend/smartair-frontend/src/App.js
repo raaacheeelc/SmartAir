@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from "react";
+<<<<<<< Updated upstream
 import Header from "./components/Header/header";
 import Dashboard from "./components/Dashboard/dashboard";
 import axios from "axios";
+=======
+import axios from 'axios';
+
+>>>>>>> Stashed changes
 
 const App = () => {
   const [data, setData] = useState([]); // Inizializzi con un array vuoto
@@ -12,6 +17,7 @@ const App = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+<<<<<<< Updated upstream
         const response = await axios.get("http://localhost:3001/data/allData");
         const result = response.data;
         console.log(result);
@@ -29,6 +35,12 @@ const App = () => {
 
         setData(formattedData);
         console.log(formattedData);
+=======
+        const response = await axios.get('http://localhost:3001/data/allData');
+        const result = await (response.data);
+        console.log(result);
+        setData(result);
+>>>>>>> Stashed changes
         setLoading(false);
       } catch (error) {
         console.error("Errore durante il recupero dei dati:", error);

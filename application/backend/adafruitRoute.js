@@ -172,11 +172,16 @@ adafruitRoute.get("/getCO2",async (req, res) => {
 });
 
 
+<<<<<<< Updated upstream
 const fetchAllData = async (feedKey) => {
+=======
+const fetchAllData = async(feedKey) =>{
+>>>>>>> Stashed changes
   try {
     const url = `https://io.adafruit.com/api/v2/acalifano/groups/dispositivosmartairfisciano/feeds/${feedKey}/data`;
 
     // Invio della richiesta GET con il token nell'header
+<<<<<<< Updated upstream
     const response = await axios.get(url, {
       headers: {
         "X-AIO-Key": process.env.ADAFRUIT_API_KEY, // Header per autenticare la richiesta
@@ -240,5 +245,61 @@ adafruitRoute.get("/allData", async (req, res) => {
   }
 });
 
+=======
+    
+        const response = await axios.get(url, {
+          headers: {
+            "X-AIO-Key": process.env.ADAFRUIT_API_KEY, // Header per autenticare la richiesta
+          },
+        });
+
+        const processedData = response.data.map((entry) => ({
+          timestamp: entry.created_at,
+          co2: parseFloat(entry.value.split(",")[0]), // Supponendo che i valori siano separati da virgola
+      }));
+    
+
+
+   // console.log("DATI ",response.data);
+
+
+    return { feed: feedKey, value:  processedData };
+} catch (error) {
+  console.error('Error retrieving data from feed:', error);
+  throw new Error('Unable to fetch data from Adafruit IO feed');
+  
+}
+}
+
+adafruitRoute.get('/allData', async(req, res) => {
+      // Chiamate parallele ai feed
+      console.log("SONO QUI");
+      try{
+      const requests = feeds.map((feedKey) => fetchAllData(feedKey));
+
+      // Attendere che tutte le chiamate siano completate
+      const results = await Promise.all(requests);
+  
+      // Risultato aggregato da tutti i feed
+      let data = [];
+
+      results.map((row, index)=>{
+        row.value.map((item, i) =>{
+        data.push({
+          feed: row.feed,
+          value: item
+        });
+      });
+      })
+
+      console.log("DATI",data);
+  
+      // Rispondi con i dati
+      res.json(data);
+      }catch(errorData){
+        res.status(500).send(errorData);
+      }
+})
+>>>>>>> Stashed changes
 
 module.exports = { adafruitRoute };
