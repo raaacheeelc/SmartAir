@@ -24,11 +24,11 @@ const Dashboard = () => {
                 <div className="card-container"> {/* Aggiungi una chiave per ciascun entry */}
                     <div className="card">
                         <h2 className="card-title">Temperatura</h2>
-                        <p className="card-value">{latestData.temperature}°C</p>
+                        <p className="card-value">{latestData.t}°C</p>
                     </div>
                     <div className="card">
                         <h2 className="card-title">Umidità</h2>
-                        <p className="card-value">{latestData.humidity}%</p>
+                        <p className="card-value">{latestData.h}%</p>
                     </div>
                     <div className="card">
                         <h2 className="card-title">CO2</h2>

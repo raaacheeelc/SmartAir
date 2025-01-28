@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import Header from "./components/Header/header";
 import Dashboard from "./components/Dashboard/dashboard";
+import axios from "axios";
 
 const App = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState([]); // Inizializzi con un array vuoto
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
@@ -11,12 +12,27 @@ const App = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://localhost:3001/data/getData");
-        const result = await response.json();
-        setData(result);
+        const response = await axios.get("http://localhost:3001/data/allData");
+        const result = response.data;
+        console.log(result);
+
+        // Assumendo che `result` sia un array di dati
+        const formattedData = result.map((row) => ({
+      
+          timestamp: row.timestamp || new Date().toISOString(), // Usa un timestamp valido
+          t: row.T || "N/A",
+          tvoc: row.tvoc || "N/A",
+          aqi: row.aqi || "N/A",
+          co2: row.co2 || "N/A",
+          h: row.h || "N/A",
+        }));
+
+        setData(formattedData);
+        console.log(formattedData);
         setLoading(false);
       } catch (error) {
         console.error("Errore durante il recupero dei dati:", error);
+        setLoading(false);
       }
     };
 
@@ -35,10 +51,9 @@ const App = () => {
 
   return (
     <div className="container">
-      <Header/>
-      <Dashboard/>
+      <Header />
       <h1>Monitoraggio Qualità dell'Aria</h1>
-      <table border="1" style={{ width: '100%', textAlign: 'center' }}>
+      <table border="1" style={{ width: "100%", textAlign: "center" }}>
         <thead>
           <tr>
             <th>Ora</th>
@@ -53,11 +68,11 @@ const App = () => {
           {currentRows.map((entry, index) => (
             <tr key={index}>
               <td>{new Date(entry.timestamp).toLocaleString()}</td>
-              <td>{entry.temperature}</td>
+              <td>{entry.t}</td>
               <td>{entry.tvoc}</td>
               <td>{entry.aqi}</td>
               <td>{entry.co2}</td>
-              <td>{entry.humidity}</td>
+              <td>{entry.h}</td>
             </tr>
           ))}
         </tbody>
@@ -65,8 +80,8 @@ const App = () => {
 
       <div className="pagination">
         <button
-            onClick={() => paginate(currentPage - 1)}
-            disabled={currentPage === 1}
+          onClick={() => paginate(currentPage - 1)}
+          disabled={currentPage === 1}
         >
           &lt; Precedente
         </button>
@@ -74,8 +89,8 @@ const App = () => {
           Pagina {currentPage} di {totalPages}
         </span>
         <button
-            onClick={() => paginate(currentPage + 1)}
-            disabled={currentPage === totalPages}
+          onClick={() => paginate(currentPage + 1)}
+          disabled={currentPage === totalPages}
         >
           Successivo &gt;
         </button>
