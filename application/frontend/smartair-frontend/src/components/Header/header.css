@@ -23,14 +23,14 @@ nav ul {
     padding: 0;
 }
 
-nav ul li a {
+nav ul li button {
     text-decoration: none;
     font-size: 16px;
     color: #11255F;
     transition: color 0.3s ease;
 }
 
-nav ul li a:hover {
+nav ul li button:hover {
     color: #11255F;
 }
 
