@@ -44,6 +44,15 @@ const App = () => {
     };
 
     fetchData();
+
+        // Imposta un intervallo di aggiornamento ogni 10 secondi
+        const interval = setInterval(() => {
+          fetchData();
+        }, 10000); // 10000 millisecondi = 10 secondi
+    
+        // Pulisci l'intervallo quando il componente viene smontato
+        return () => clearInterval(interval);
+
   }, []);
 
   if (loading) return <div>Caricamento...</div>;
