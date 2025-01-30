@@ -1,27 +1,30 @@
 import React, { useEffect, useState } from "react";
-//import "./aqi.css"; // Stile della tabella
+import "./tableElements.css";
 import Header from "../Header/header";
 import axios from "axios";
 
-const Co2 = () => {
+const Aqi = () => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
+    const [selectedDate, setSelectedDate] = useState("");
+    const [filteredData, setFilteredData] = useState([]);
+    const [isFiltered, setIsFiltered] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
 
-                const response = await axios.get("http://localhost:3001/data/getCO2");
+                const response = await axios.get("http://localhost:3001/data/getAQI");
                 const result = response.data;
                 console.log(result);
 
                 // Assumendo che `result` sia un array di dati
                 const formattedData = result.map((row) => ({
 
-                    timestamp: row.timestamp || new Date().toISOString(), // Usa un timestamp valido
-                    co2: row.co2 || "N/A",
+                    timestamp: row.timestamp || new Date().toISOString(),
+                    aqi: row.aqi || "N/A",
 
                 }));
 
@@ -39,23 +42,55 @@ const Co2 = () => {
         fetchData();
     }, []);
 
+    const filterData = () => {
+        if (!selectedDate) {
+            alert("Seleziona una data per filtrare");
+            return;
+        }
+
+        const filtered = data.filter((entry) => {
+            const entryDate = new Date(entry.timestamp);
+            const selected = new Date(selectedDate);
+
+            const isSameDay = entryDate.toDateString() === selected.toDateString();
+
+            return isSameDay;
+        });
+
+        console.log('Filtered Data:', filtered);
+        setFilteredData(filtered);
+        setIsFiltered(true);
+        setCurrentPage(1);
+    };
+
     if (loading) return <div>Caricamento...</div>;
 
     const indexOfLastRow = currentPage * rowsPerPage;
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-    const currentRows = data.slice(indexOfFirstRow, indexOfLastRow);
-
+    const displayedData = isFiltered ? filteredData : data;
+    const currentRows = displayedData.slice(indexOfFirstRow, indexOfLastRow);
     const totalPages = Math.ceil(data.length / rowsPerPage);
 
     return (
         <div className="aqi-container">
-            <Header />
-            <h1>Monitoraggio Qualità dell'Aria</h1>
-            <table border="1" style={{ width: "100%", textAlign: "center" }}>
+            <Header/>
+            <h1>Monitoraggio AQI</h1>
+            <div className="date-filter">
+                <label>
+                    Seleziona Data:
+                    <input
+                        type="date"
+                        value={selectedDate}
+                        onChange={(e) => setSelectedDate(e.target.value)}
+                    />
+                </label>
+                <button onClick={filterData}>Filtra Dati</button>
+            </div>
+            <table>
                 <thead>
                 <tr>
-                    <th>Ora</th>
-                    <th>Co2</th>
+                    <th>Data</th>
+                    <th>AQI</th>
 
                 </tr>
                 </thead>
@@ -63,7 +98,7 @@ const Co2 = () => {
                 {currentRows.map((entry, index) => (
                     <tr key={index}>
                         <td>{new Date(entry.timestamp).toLocaleString()}</td>
-                        <td>{entry.co2}</td>
+                        <td>{entry.aqi}</td>
 
                     </tr>
                 ))}
@@ -88,4 +123,4 @@ const Co2 = () => {
     );
 };
 
-export default Co2;
+export default Aqi;

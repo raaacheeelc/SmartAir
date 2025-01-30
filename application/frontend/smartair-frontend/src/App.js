@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-
+import "./App.css"
 import Header from "./components/Header/header";
-import Dashboard from "./components/Dashboard/dashboard";
 import axios from "axios";
 
 
@@ -12,6 +11,9 @@ const App = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
+  const [selectedDate, setSelectedDate] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
+  const [isFiltered, setIsFiltered] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,22 +57,55 @@ const App = () => {
 
   }, []);
 
+  const filterData = () => {
+    if (!selectedDate) {
+      alert("Seleziona una data per filtrare");
+      return;
+    }
+
+    const filtered = data.filter((entry) => {
+      const entryDate = new Date(entry.timestamp);
+      const selected = new Date(selectedDate);
+
+      const isSameDay = entryDate.toDateString() === selected.toDateString();
+
+      return isSameDay;
+    });
+
+    console.log('Filtered Data:', filtered);
+    setFilteredData(filtered);
+    setIsFiltered(true);
+    setCurrentPage(1);
+  };
+
   if (loading) return <div>Caricamento...</div>;
 
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = data.slice(indexOfFirstRow, indexOfLastRow);
+  const displayedData = isFiltered ? filteredData : data;
+  const currentRows = displayedData.slice(indexOfFirstRow, indexOfLastRow);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const totalPages = Math.ceil(data.length / rowsPerPage);
 
   return (
-    <div className="container">
-      <Header />
-      <h1>Monitoraggio Qualità dell'Aria</h1>
-      <table border="1" style={{ width: "100%", textAlign: "center" }}>
-        <thead>
+      <div className="container">
+        <Header/>
+        <h1>Monitoraggio Qualità dell'Aria</h1>
+        <div className="date-filter">
+          <label>
+            Seleziona Data:
+            <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+            />
+          </label>
+          <button onClick={filterData}>Filtra Dati</button>
+        </div>
+        <table>
+          <thead>
           <tr>
             <th>Ora</th>
             <th>Temperatura (°C)</th>
@@ -79,39 +114,39 @@ const App = () => {
             <th>CO2 (ppm)</th>
             <th>Umidità (%)</th>
           </tr>
-        </thead>
-        <tbody>
+          </thead>
+          <tbody>
           {currentRows.map((entry, index) => (
-            <tr key={index}>
-              <td>{new Date(entry.timestamp).toLocaleString()}</td>
-              <td>{entry.t}</td>
-              <td>{entry.tvoc}</td>
-              <td>{entry.aqi}</td>
-              <td>{entry.co2}</td>
-              <td>{entry.h}</td>
-            </tr>
+              <tr key={index}>
+                <td>{new Date(entry.timestamp).toLocaleString()}</td>
+                <td>{entry.t}</td>
+                <td>{entry.tvoc}</td>
+                <td>{entry.aqi}</td>
+                <td>{entry.co2}</td>
+                <td>{entry.h}</td>
+              </tr>
           ))}
-        </tbody>
-      </table>
+          </tbody>
+        </table>
 
-      <div className="pagination">
-        <button
-          onClick={() => paginate(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
-          &lt; Precedente
-        </button>
-        <span>
+        <div className="pagination">
+          <button
+              onClick={() => paginate(currentPage - 1)}
+              disabled={currentPage === 1}
+          >
+            &lt; Precedente
+          </button>
+          <span>
           Pagina {currentPage} di {totalPages}
         </span>
-        <button
-          onClick={() => paginate(currentPage + 1)}
-          disabled={currentPage === totalPages}
-        >
-          Successivo &gt;
-        </button>
+          <button
+              onClick={() => paginate(currentPage + 1)}
+              disabled={currentPage === totalPages}
+          >
+            Successivo &gt;
+          </button>
+        </div>
       </div>
-    </div>
   );
 };
 
