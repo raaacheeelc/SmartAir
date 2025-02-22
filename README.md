@@ -1,133 +1,143 @@
 # SmartAir
-# **Monitoraggio della Qualità dell'Aria con IoT**
+## Monitoraggio della Qualità dell'Aria con IoT
 
-## **Descrizione del Progetto**
-Questo progetto è stato sviluppato per scopi universitari e si concentra sul monitoraggio della qualità dell'aria in determinati comuni. Utilizza dispositivi IoT per raccogliere dati relativi a:
+### Descrizione del Progetto
+Questo progetto, sviluppato per scopi universitari, monitora la qualità dell'aria in determinati comuni. Utilizza dispositivi IoT per raccogliere dati relativi a:
 
 - **CO2** (anidride carbonica)  
 - **TVOC** (composti organici volatili totali)  
 - **AQI** (indice di qualità dell'aria)  
 - **Temperatura**  
-- **Umidità**
+- **Umidità**  
 
-### **Flusso del Sistema**
-1. **Raccolta Dati:**  
-   I dati vengono raccolti tramite sensori collegati a un dispositivo IoT.
-
-2. **Trasmissione al Fog Node:**  
-   I dati vengono inviati dal dispositivo IoT al **Fog Node** utilizzando **MQTT** con certificati per garantire la sicurezza della comunicazione.
-
-3. **Pre-elaborazione nel Fog Node:**  
-   Il **Fog Node** riceve i dati, li pre-elabora e li invia al cloud **Adafruit IO** tramite **API REST** utilizzando una chiave di autenticazione (**API Key**).
-
-4. **Gestione sul Cloud (Adafruit IO):**  
-   - **Salvataggio Dati:** Adafruit IO tiene traccia dei dati ricevuti.  
-   - **Notifiche:** In caso di valori critici (es. alta concentrazione di CO2), il sistema invia una **notifica via email** per segnalare i problemi.  
-
-5. **Accesso ai Dati:**  
-   I dati vengono resi disponibili per un'applicazione web tramite l'API di **Adafruit IO**, consentendo agli utenti di monitorare la qualità dell'aria attraverso grafici e report.
+### Flusso del Sistema
+1. **Raccolta Dati:** Sensori IoT raccolgono le informazioni ambientali.
+2. **Trasmissione al Fog Node:** I dati vengono inviati via **MQTT con certificati TLS** al **Fog Node**.
+3. **Elaborazione nel Fog Node:** Il Fog Node pre-elabora i dati e li invia ad **Adafruit IO** tramite **API REST**.
+4. **Gestione sul Cloud (Adafruit IO):** Salvataggio dati e invio di notifiche email in caso di valori critici.
+5. **Accesso ai Dati:** L’API di Adafruit IO permette il monitoraggio tramite un'applicazione web.
 
 ---
 
-## **Caratteristiche Principali**
+## Caratteristiche Principali
 - **Sicurezza:**  
-  - Utilizzo di certificati TLS per la trasmissione dei dati tramite MQTT.  
-  - Autenticazione tramite **API Key** per comunicare con Adafruit IO.
+  - **TLS su MQTT** per proteggere i dati in transito.  
+  - **ACL nel broker MQTT** per garantire accesso limitato ai soli dispositivi autorizzati.  
+  - **API Key per autenticazione con Adafruit IO**.  
 
-- **Pre-elaborazione Dati:**  
-  Il Fog Node analizza e pre-elabora i dati prima di inviarli al cloud.
+- **Pre-elaborazione dati:** Il Fog Node filtra ed elabora i dati prima dell’invio al cloud.  
 
 - **Notifiche in tempo reale:**  
-  Adafruit IO invia email in caso di problemi rilevati nei dati (es. valori fuori soglia).
+  - Se i valori di CO2 o TVOC superano una soglia critica, Adafruit IO invia email automatiche.  
 
-- **Piattaforma Web:**  
-  I dati vengono resi disponibili su una piattaforma web per la visualizzazione da parte degli utenti finali.
+- **Containerizzazione con Docker:**  
+  - Il **Fog Node** e il **Broker MQTT** vengono eseguiti in **container Docker**.  
 
 ---
 
-## **Struttura del Sistema**
+## Struttura del Sistema
+
 1. **Dispositivo IoT:**  
    - Hardware: Sensori di CO2, TVOC, temperatura e umidità.  
-   - Protocollo: **MQTT** con certificati TLS.  
+   - Protocollo: **MQTT con certificati TLS**.  
 
 2. **Fog Node:**  
+   - Eseguito in un container Docker.  
    - Software: Scritto in **Python**.  
-   - Funzioni: Pre-elaborazione dati, invio sicuro ad Adafruit IO tramite HTTP POST.
+   - Funzioni: Pre-elaborazione dati, invio ad Adafruit IO via API.  
 
-3. **Cloud (Adafruit IO):**  
-   - Salvataggio e gestione dati.  
-   - Invio notifiche email.  
-   - API per l'accesso ai dati.
+3. **Broker MQTT:**  
+   - **Mosquitto MQTT** in un container Docker.  
+   - Configurato con **ACL per l’accesso sicuro**.  
 
-4. **Piattaforma Web:**  
-   - Presentazione dei dati con grafici e report.  
-   - Accesso tramite API Key di Adafruit IO.
+4. **Cloud (Adafruit IO):**  
+   - Salvataggio dati.  
+   - API per la consultazione dei dati.  
+
+5. **Piattaforma Web:**  
+   - Grafici e report sui dati raccolti.  
 
 ---
 
-## **Setup del Progetto**
+## Setup del Progetto
 
-### **Requisiti**
+### Requisiti
 - **Hardware:**  
-  - Sensore di CO2.  
-  - Sensore di TVOC.  
-  - Sensore di temperatura e umidità.  
-  - Scheda IoT compatibile (es. ESP32 o Raspberry Pi).  
+  - Sensori CO2, TVOC, temperatura, umidità.  
+  - **ESP32 o Raspberry Pi**.  
 
 - **Software:**  
-  - Fog Node: Python 3 con librerie necessarie (es. `paho-mqtt`, `requests`).  
-  - Cloud: Account su **Adafruit IO**.  
+  - Docker e Docker Compose.  
+  - Python 3 + librerie (`paho-mqtt`, `requests`).  
+  - Account su **Adafruit IO**.  
 
 ---
 
-### **Istruzioni per l'Installazione**
-1. **Configurazione del Dispositivo IoT:**  
-   - Collega i sensori alla scheda IoT.  
-   - Configura l'invio dei dati tramite MQTT.
+### Istruzioni per l'Installazione e Avvio
 
-2. **Configurazione del Fog Node:**  
-   - Installa le dipendenze richieste con:  
-     ```bash
-     pip install paho-mqtt requests
-     ```
-   - Avvia lo script Python per ricevere i dati e inviarli ad Adafruit IO.
+#### 1. Clonare la Repository
+Scaricare il codice dal repository GitHub:  
+```bash
+git clone https://github.com/raaacheeelc/SmartAir.git
+cd SmartAir
+```
 
-3. **Configurazione di Adafruit IO:**  
-   - Crea un account su [Adafruit IO](https://io.adafruit.com/).  
-   - Configura i feed per salvare i dati.  
-   - Genera una **API Key** per autenticare le richieste.  
+#### 2. Configurare il Fog Node e il Broker MQTT
+Il **Fog Node** e il **Broker MQTT** vengono eseguiti all’interno di container Docker.
 
-4. **Test del Sistema:**  
-   - Invia dati di test dal dispositivo IoT.  
-   - Verifica che i dati siano salvati su Adafruit IO e che le notifiche email funzionino.
+- **Creazione dei container:**  
+  ```bash
+  docker-compose up -d
+  ```
+- **Verifica dello stato dei container:**  
+  ```bash
+  docker ps
+  ```
+
+#### 3. Configurazione di Adafruit IO
+- Creare un account su [Adafruit IO](https://io.adafruit.com/).  
+- Configurare i feed per salvare i dati.  
+- Generare una **API Key** per autenticare le richieste.  
+
+#### 4. Utilizzo dei file Docker per il Fog Node e il Broker MQTT
+All'interno della repository è presente il file `docker-compose.yml`, che definisce i servizi Docker necessari.
+
+- **Broker MQTT (Mosquitto):**
+  - Il file `mosquitto.conf` specifica le ACL e la configurazione della persistenza.
+  - I certificati TLS sono utilizzati per proteggere la comunicazione.
+
+- **Fog Node:**
+  - Il file `Dockerfile` definisce l'ambiente di esecuzione per il nodo di pre-elaborazione.
+  - Il codice Python esegue l'acquisizione dati, l'elaborazione e l'invio ad Adafruit IO.
+
+#### 5. Avviare il Fog Node
+Se non viene avviato automaticamente dal container, eseguire:  
+```bash
+python fog_node.py
+```
+
+#### 6. Verificare il Funzionamento
+- Inviare dati di test dal dispositivo IoT.
+- Controllare che i dati vengano salvati su Adafruit IO.
 
 ---
 
-## **Obiettivi Futuri**
+## Obiettivi Futuri
 - **Miglioramento della Sicurezza:**  
-  - Implementazione di OAuth 2.0 per l'autenticazione.  
-  - Utilizzo di crittografia end-to-end.
+  - Implementazione di **OAuth 2.0**.  
+  - **Crittografia end-to-end** per i dati raccolti.  
 
 - **Estensione delle Funzionalità:**  
-  - Supporto a più comuni per il monitoraggio distribuito.  
-  - Integrazione con altre piattaforme cloud.  
+  - Supporto per il monitoraggio distribuito su più comuni.  
+  - Integrazione con altri servizi cloud.  
 
 - **Analisi Avanzata:**  
-  - Applicazione di algoritmi di machine learning per rilevare pattern nei dati.  
+  - **Machine Learning** per il rilevamento di pattern nei dati.  
 
 ---
 
-## **Contributi**
-Per contribuire al progetto, invia una pull request o contattaci tramite [email](mailto:tuoemail@example.com).
-
----
-
-## **Licenza**
-Questo progetto è distribuito sotto la licenza MIT. Per maggiori dettagli, consulta il file [LICENSE](./LICENSE).
-
----
-
-## **Autori**
-- Nome Cognome - [GitHub](https://github.com/tuousername)  
-- Università degli Studi di ...
+## Autori
+- Alfonso Califano
+- Rachele Capuano
+- Università degli Studi di Salerno
 
